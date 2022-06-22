@@ -18,17 +18,17 @@ def add_films():
 
     except Exception as e:
         print("error accures :" +str(e))
+        return "failed to add"
 
-@app.route('/update',methods=['get','put'])
+@app.route('/update',methods=['put'])
 def update_films():
     try:
-        val=request.args.get('roll_num')
-        print(val)
-        newval=request.get_json()
-        print(newval)
-        mycol.update_one({'roll_num':val},{"$set":newval})
 
-        return "success updated"
+        val2=request.get_json()
+        val=request.args.get('title')
+
+        mycol.update_many({'title':val},{"$set":val2})
+        return "successfully updated"       
 
     except Exception as e:
         print("Error on updating :" +str(e))
