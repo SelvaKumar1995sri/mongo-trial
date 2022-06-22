@@ -19,30 +19,28 @@ def add_films():
     except Exception as e:
         print("error accures :" +str(e))
 
-@app.route('/update',methods=['put'])
+@app.route('/update',methods=['get','put'])
 def update_films():
     try:
-        val=request.get_json("_id")
-        curser=mycol.find()
-        for doc in curser:
-            if doc['_id']==val: 
-                j=doc['year']
-                myq={"year":j}
-                newj={"$set":{"year":"2017"}}
-                mycol.update_one(myq,newj)
+        val=request.args.get('roll_num')
+        print(val)
+        newval=request.get_json()
+        print(newval)
+        mycol.update_one({'roll_num':val},{"$set":newval})
 
-        return "success"
+        return "success updated"
 
     except Exception as e:
         print("Error on updating :" +str(e))
+        return "failed on updating"
 
 @app.route('/delete',methods=['get','delete'])
 def delete_films():
     try:
-        val=request.get_json('title')
+        val=request.get_json('_id')
         curser=mycol.find()
         for i in curser:
-            if i['title']==val:
+            if i['_id']==val:
                 mycol.delete_one(i)
         
         
@@ -52,7 +50,19 @@ def delete_films():
         print("Error on updating :" +str(e))
 
 
+@app.route('/view',methods=['get'])
+def view_films():
+    try:
+        
+        curser=mycol.find()
+        for i in curser:
+            print(i)
+        
+        
+        return "success"
 
+    except Exception as e:
+        print("Error on updating :" +str(e))
 
 
 if __name__=='__main__':
