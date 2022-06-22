@@ -65,5 +65,15 @@ def view_films():
         print("Error on updating :" +str(e))
 
 
+@app.route('/dropall',methods=['delete'])
+def dropall():
+    try:
+        mycol.drop()
+        return "Files erased successfully"
+
+    except Exception as e:
+        print("error", +str(e))
+
+
 if __name__=='__main__':
    app.run(debug=True)
