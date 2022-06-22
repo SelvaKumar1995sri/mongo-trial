@@ -1,9 +1,7 @@
 import pymongo
 import json
-#client=pymongo.MongoClient("mongodb+srv://selvamongouser:Selvamongopassword@cluster0.fvlkt0v.mongodb.net/?retryWrites=true&w=majority")
+client=pymongo.MongoClient("mongodb+srv://gayathri:Sairambaba@cluster1.davwpcs.mongodb.net/?retryWrites=true&w=majority")
 
-db=open("film_database.json",'r')
-data_list=json.load(db)['database']
-
-for i in data_list:
-    print()
+mydb=client['mydatabase']
+mycol=mydb['film_collection']
+print(mydb.list_collection_names())
