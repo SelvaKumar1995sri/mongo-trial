@@ -1,10 +1,11 @@
+from bson import ObjectId
 from pydantic import BaseModel
 import pymongo
 from flask import Flask
 from fastapi import FastAPI
 from requests import request
 import uvicorn
-import student_schema
+from student_schema import Student_se,Student_serial
 
 
 client=pymongo.MongoClient("mongodb+srv://mongouser:mongopwd@cluster1.davwpcs.mongodb.net/?retryWrites=true&w=majority")
@@ -23,9 +24,8 @@ class Student(BaseModel):
 def view_det(roll_no):
     try:
         
-        output=mycollection.find({"roll_no":int(roll_no)})
-        print(type(roll_no))
-        return student_schema(output)
+        output=Student_serial(mycollection.find({"roll_no":int(roll_no)}))
+        return {"status": "ok","data":output}
         
     except Exception as e:
         print("error on viewing data " +str(e))
@@ -50,13 +50,13 @@ def delete_det(roll_no):
 
 
 @app.put('/api/update/{roll_no}',tags=["student"])
-def update(roll_no,student:Student):
+def update(roll_no:str,student:Student):
     try:
-        myquery=dict(mycollection.find({"roll_no":roll_no}))
-        print(myquery)
-        newval=student
-        output=mycollection.update_one(myquery,newval)
-        return "successfull"
+        mycollection.find_one_and_update({"roll_no":ObjectId(roll_no)},{
+            "$set":dict(student)
+        })
+        output=mycollection.find({"roll_no":ObjectId(roll_no)})
+        return {"status": "ok","data":output}
     except Exception as e:
         print("error on viewing data " +str(e))
 
