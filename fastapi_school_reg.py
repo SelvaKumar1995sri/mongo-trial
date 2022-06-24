@@ -63,11 +63,11 @@ def delete_det(roll_no):
 def update(roll_no,student:Student):
     try:
         
-        userip={"$set":dict(student)}
-        myquery=Student_serial(mycollection.find({"roll_no":int(roll_no)}))
-        mycollection.update_one(userip,myquery)
+        userip=dict(student)
+        
+        mycollection.update_many({"roll_no":int(roll_no)},{"$set":userip})
 
-        return Student_serial(mycollection.find_one({"roll_no":roll_no}))
+        return Student_serial(mycollection.find({"roll_no":roll_no}))
 
     except Exception as e:
         print("error on viewing data " +str(e))
