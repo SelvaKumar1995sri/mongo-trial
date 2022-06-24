@@ -20,6 +20,16 @@ class Student(BaseModel):
     age:int
     location:str
 
+@app.get('/api/viewAll',tags=['student'])
+def view_all():
+    try:
+        print(Student_serial(mycollection.find()))
+        return  Student_serial(mycollection.find())
+
+        
+    except Exception as e:
+        print("error on viewing data " +str(e))
+
 @app.get('/api/viewstudentdetails/{roll_no}',tags=['student'])
 def view_det(roll_no):
     try:
@@ -50,13 +60,15 @@ def delete_det(roll_no):
 
 
 @app.put('/api/update/{roll_no}',tags=["student"])
-def update(roll_no:str,student:Student):
+def update(roll_no,student:Student):
     try:
-        mycollection.find_one_and_update({"roll_no":ObjectId(roll_no)},{
-            "$set":dict(student)
-        })
-        output=mycollection.find({"roll_no":ObjectId(roll_no)})
-        return {"status": "ok","data":output}
+        
+        userip={"$set":dict(student)}
+        myquery=Student_serial(mycollection.find({"roll_no":int(roll_no)}))
+        mycollection.update_one(userip,myquery)
+
+        return Student_serial(mycollection.find_one({"roll_no":roll_no}))
+
     except Exception as e:
         print("error on viewing data " +str(e))
 
