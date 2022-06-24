@@ -26,7 +26,6 @@ def view_all():
     try:
         print(Student_serial(mycollection.find()))
         return  Student_serial(mycollection.find())
-
         
     except Exception as e:
         print("error on viewing data " +str(e))
@@ -84,7 +83,7 @@ class Films(BaseModel):
 @app.get('/api/viewall',tags=['Films'])
 def viewall():
     try:
-        print(films_serial(mycollection.find()))
+        films_serial(mycollection.find())
         return films_serial(mycollection.find())
 
     except Exception as e:
@@ -127,4 +126,4 @@ def update(roll_num,film:Films):
 
 
 if __name__=='__main__':
-    uvicorn.run("stu_film:app",reload=True,access_log=False)
+    uvicorn.run("stu_&_film:app",reload=True,access_log=False)
