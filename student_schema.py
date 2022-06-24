@@ -20,4 +20,4 @@ def films_schema(film):
     }
 
 def films_serial(films):
-    return [films_serial(film) for film in films]
+    return [films_schema(film) for film in films]
