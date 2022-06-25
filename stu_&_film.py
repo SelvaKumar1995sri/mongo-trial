@@ -98,11 +98,17 @@ def update_student(roll_no, student: Student):
 
 
 class Films(BaseModel):
-    roll_num: int
-    title: str
-    year: int
+    Sno: int
+    Title: str
+    Year: int
+    Rated: str
+    Released: str
+    Runtime: str
+    Genre: str
     Director: str
-    jurner: str
+    Writer: str
+    Actors: str
+    Language: str
 
 
 @app.get('/api/view all', tags=['Films'])
@@ -116,11 +122,16 @@ def view_all():
         return "failed"
 
 
-@app.get('/api/view student/{roll_num}', tags=['Films'])
-def view_films(roll_num):
+@app.get('/api/view student/{Sno}', tags=['Films'])
+def view_films(Sno:int):
     try:
-        if films_serial(film_collection.find({"roll_num": roll_num})):
-            output = films_serial(film_collection.find({"roll_num": roll_num}))
+        list_id = []
+        for i in film_collection.find():
+            list_id.append(i["Sno"])
+        max_id = max(list_id)
+        if max_id>=int(Sno):
+            output = films_serial(film_collection.find({"Sno": int(Sno)}))
+            print(output)
             return {"data": output}
         else:
             return "give a valid roll no"
@@ -140,18 +151,18 @@ def add_new_film(film: Films):
         return "failed"
 
 
-@app.put('/api/updating/{roll_num}', tags=['Films'])
-def update_film(roll_num, film: Films):
+@app.put('/api/updating/{Sno}', tags=['Films'])
+def update_film(Sno, film: Films):
     try:
         list_id = []
         for i in film_collection.find():
-            list_id.append(i["roll_num"])
+            list_id.append(i["Sno"])
         max_id = max(list_id)
         userip = dict(film)
 
-        if max_id >= int(roll_num):
+        if max_id >= int(Sno):
             film_collection.update_many(
-                {"roll_num": int(roll_num)}, {"$set": userip})
+                {"roll_num": int(Sno)}, {"$set": userip})
             return "Successfully Updated"
 
         else:
@@ -172,10 +183,10 @@ def format_collection():
         return "failed"
 
 
-@app.delete('/api/deleting film{roll_num}', tags=['Films'])
-def delete_film(roll_num):
+@app.delete('/api/deleting film{Sno}', tags=['Films'])
+def delete_film(Sno):
     try:
-        if film_collection.delete_one({"roll_num": int(roll_num)}):
+        if film_collection.delete_one({"roll_num": int(Sno)}):
             return "successfully deleted"
 
         else:
@@ -183,6 +194,33 @@ def delete_film(roll_num):
     except Exception as e:
         print("error " + str(e))
         return "failed"
+
+
+@app.get('/api/Filter by Director/{Director}', tags=['Films'])
+def list_by_director(Director):
+    try:
+        d=[]
+        for i in film_collection.find():
+            d.append(i["Director"])
+
+        if Director not in d:
+            return "Kindly give existing Film Director name or give valid name"    
+        else:
+            response = films_serial(film_collection.find({"Director": Director}))
+            return {"data": response}
+
+    except Exception as e:
+        print("Error in filtering Director ", +str(e))
+        return "failed to filter"
+
+@app.get('/api/Filter by Year/{Year}', tags=['Films'])
+def list_by_director(Year):
+    try:
+        response = films_serial(film_collection.find({"Year": Year}))
+        return {"data": response}
+    except Exception as e:
+        print("Error in filtering Director ", +str(e))
+        return "failed to filter"
 
 
 if __name__ == '__main__':

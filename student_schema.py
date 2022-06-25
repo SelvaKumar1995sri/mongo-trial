@@ -12,11 +12,17 @@ def Student_serial(Students):
 
 def films_schema(film):
     return {
-        "roll_num":int(film["roll_num"]),
-        "title":str(film["title"]),
-        "year":int(film["year"]),
-        "Director":str(film["Director"]),
-        "jurner":str(film["jurner"])
+        "Sno":int(film["Sno"]),
+        "Title": str(film["Title"]),
+        "Year": int(film["Year"]),
+        "Rated": str(film["Rated"]),
+        "Released": str(film["Released"]),
+        "Runtime": str(film["Runtime"]),
+        "Genre": str(film["Genre"]),
+        "Director": str(film["Director"]),
+        "Writer": str(film["Writer"]),
+        "Actors": str(film["Actors"]),
+        "Language": str(film["Language"])
     }
 
 def films_serial(films):
