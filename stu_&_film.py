@@ -27,8 +27,11 @@ class Student(BaseModel):
 @app.get('/api/viewAll', tags=['student'])
 def view_all():
     try:
-        print(Student_serial(Student_collection.find()))
-        return Student_serial(Student_collection.find())
+        output = Student_serial(Student_collection.find())
+        if output == []:
+            return "No Data exist to view"
+        else:
+            return {"data": output}
 
     except Exception as e:
         print("error on viewing data " + str(e))
@@ -37,10 +40,13 @@ def view_all():
 @app.get('/api/viewstudentdetails/{roll_no}', tags=['student'])
 def view_student(roll_no):
     try:
-
         output = Student_serial(
             Student_collection.find({"roll_no": int(roll_no)}))
-        return {"status": "ok", "data": output}
+        if output == []:
+            return "give a valid value to find"
+
+        else:
+            return {"status": "ok", "data": output}
 
     except Exception as e:
         print("error on viewing data " + str(e))
@@ -58,8 +64,14 @@ def add_student(student: Student):
 @app.delete('/api/delete student by rollno/{roll_no}', tags=['student'])
 def delete_student(roll_no):
     try:
-        Student_collection.delete_one({"roll_no": int(roll_no)})
-        return "deleted successfully"
+        output = Student_serial(
+            Student_collection.find({"roll_no": int(roll_no)}))
+        if output == []:
+            return "Give vaid roll_no from existing database"
+        else:
+            Student_collection.delete_one({"roll_no": int(roll_no)})
+            return "deleted successfully"
+
     except Exception as e:
         print("error on viewing data " + str(e))
 
@@ -67,13 +79,19 @@ def delete_student(roll_no):
 @app.put('/api/update/{roll_no}', tags=["student"])
 def update_student(roll_no, student: Student):
     try:
-
+        list_id = []
+        for i in Student_collection.find():
+            list_id.append(i["roll_no"])
+        max_id = max(list_id)
         userip = dict(student)
 
-        Student_collection.update_many(
-            {"roll_no": int(roll_no)}, {"$set": userip})
+        if max_id >= int(roll_no):
+            Student_collection.update_one(
+                {"roll_no": int(roll_no)}, {"$set": userip})
+            return "Updated Successfully"
 
-        return Student_serial(Student_collection.find({"roll_no": roll_no}))
+        else:
+            return "Given value not valid ,choose from existing Data "
 
     except Exception as e:
         print("error on viewing data " + str(e))
@@ -98,6 +116,20 @@ def view_all():
         return "failed"
 
 
+@app.get('/api/view student/{roll_num}', tags=['Films'])
+def view_films(roll_num):
+    try:
+        if films_serial(film_collection.find({"roll_num": roll_num})):
+            output = films_serial(film_collection.find({"roll_num": roll_num}))
+            return {"data": output}
+        else:
+            return "give a valid roll no"
+
+    except Exception as e:
+        print("error " + str(e))
+        return "failed"
+
+
 @app.post('/api/adding new film details', tags=['Films'])
 def add_new_film(film: Films):
     try:
@@ -111,12 +143,19 @@ def add_new_film(film: Films):
 @app.put('/api/updating/{roll_num}', tags=['Films'])
 def update_film(roll_num, film: Films):
     try:
+        list_id = []
+        for i in film_collection.find():
+            list_id.append(i["roll_num"])
+        max_id = max(list_id)
         userip = dict(film)
 
-        film_collection.update_many(
-            {"roll_num": int(roll_num)}, {"$set": userip})
+        if max_id >= int(roll_num):
+            film_collection.update_many(
+                {"roll_num": int(roll_num)}, {"$set": userip})
+            return "Successfully Updated"
 
-        return films_serial(film_collection.find({"roll_num": roll_num}))
+        else:
+            return "Given roll no not exist, Choose from existing Data to update"
 
     except Exception as e:
         print("error " + str(e))
@@ -136,8 +175,11 @@ def format_collection():
 @app.delete('/api/deleting film{roll_num}', tags=['Films'])
 def delete_film(roll_num):
     try:
-        film_collection.delete_one({"roll_num": int(roll_num)})
-        return "successfully deleted"
+        if film_collection.delete_one({"roll_num": int(roll_num)}):
+            return "successfully deleted"
+
+        else:
+            return "Give a existing roll no"
     except Exception as e:
         print("error " + str(e))
         return "failed"
