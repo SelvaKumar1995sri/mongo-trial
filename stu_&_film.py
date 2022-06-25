@@ -214,14 +214,29 @@ def list_by_director(Director):
         return "failed to filter"
 
 @app.get('/api/Filter by Year/{Year}', tags=['Films'])
-def list_by_director(Year):
+def list_by_Year(Year):
     try:
-        response = films_serial(film_collection.find({"Year": Year}))
+        response = films_serial(film_collection.find({"Year":int(Year)}))
+        print(response)
         return {"data": response}
     except Exception as e:
         print("Error in filtering Director ", +str(e))
         return "failed to filter"
 
+# @app.get('/api/Filter from Year/{Year}', tags=['Films'])
+# def list_from_year(Year):
+#     try:
+#         res=[]
+#         for i in films_serial(film_collection.find()):
+#             if int(Year)<=i["Year"]:
+#                res.append(i) 
+#                return {"data":res}
+                
+
+
+    except Exception as e:
+        print("Error in filtering Director ", +str(e))
+        return "failed to filter"
 
 if __name__ == '__main__':
     uvicorn.run("stu_&_film:app", reload=True, access_log=False)
