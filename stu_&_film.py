@@ -2,7 +2,7 @@ from bson import ObjectId
 from pydantic import BaseModel
 import pymongo
 from flask import Flask
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile
 from requests import request
 import uvicorn
 from student_schema import Student_se, Student_serial, films_serial, films_schema
@@ -123,13 +123,13 @@ def view_all():
 
 
 @app.get('/api/view student/{Sno}', tags=['Films'])
-def view_films(Sno:int):
+def view_films(Sno: int):
     try:
         list_id = []
         for i in film_collection.find():
             list_id.append(i["Sno"])
         max_id = max(list_id)
-        if max_id>=int(Sno):
+        if max_id >= int(Sno):
             output = films_serial(film_collection.find({"Sno": int(Sno)}))
             print(output)
             return {"data": output}
@@ -199,44 +199,56 @@ def delete_film(Sno):
 @app.get('/api/Filter by Director/{Director}', tags=['Films'])
 def list_by_director(Director):
     try:
-        d=[]
+        d = []
         for i in film_collection.find():
             d.append(i["Director"])
 
         if Director not in d:
-            return "Kindly give existing Film Director name or give valid name"    
+            return "Kindly give existing Film Director name or give valid name"
         else:
-            response = films_serial(film_collection.find({"Director": Director}))
+            response = films_serial(
+                film_collection.find({"Director": Director}))
             return {"data": response}
 
     except Exception as e:
         print("Error in filtering Director ", +str(e))
         return "failed to filter"
 
+
 @app.get('/api/Filter by Year/{Year}', tags=['Films'])
 def list_by_Year(Year):
     try:
-        response = films_serial(film_collection.find({"Year":int(Year)}))
+        response = films_serial(film_collection.find({"Year": int(Year)}))
         print(response)
         return {"data": response}
     except Exception as e:
         print("Error in filtering Director ", +str(e))
         return "failed to filter"
 
-# @app.get('/api/Filter from Year/{Year}', tags=['Films'])
-# def list_from_year(Year):
-#     try:
-#         res=[]
-#         for i in films_serial(film_collection.find()):
-#             if int(Year)<=i["Year"]:
-#                res.append(i) 
-#                return {"data":res}
-                
 
+@app.get('/api/Filter from Year/{Year}', tags=['Films'])
+def list_from_year(Year):
+    try:
+        year = []
+        for y in film_collection.find():
+            year.append(y["Year"])
+        if max(year) >= int(Year):
+            result = films_serial(film_collection.find(
+                {'Year': {'$gte': int(Year)}}))
+            return {"data": result}
+        else:
+            return "Give Year value in existing Range"
 
     except Exception as e:
         print("Error in filtering Director ", +str(e))
         return "failed to filter"
+
+@app.post('/uploadfile',tags=['Films'])
+def upload_file(file : UploadFile=File()):
+    films_serial(film_collection.insert_one({"file":file}))
+    
+    return {"name of the file":file.filename}
+
 
 if __name__ == '__main__':
     uvicorn.run("stu_&_film:app", reload=True, access_log=False)
