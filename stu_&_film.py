@@ -52,7 +52,7 @@ def view_student(roll_no):
         print("error on viewing data " + str(e))
 
 
-@app.post('/api/adding new student/', tags=['student'])
+@app.post('/api/addingNewStudent/', tags=['student'])
 def add_student(student: Student):
     try:
         Student_collection.insert_one(student.dict())
@@ -61,7 +61,7 @@ def add_student(student: Student):
         print("error on add data " + str(e))
 
 
-@app.delete('/api/delete student by rollno/{roll_no}', tags=['student'])
+@app.delete('/api/deleteStudentByRollno/{roll_no}', tags=['student'])
 def delete_student(roll_no):
     try:
         output = Student_serial(
@@ -111,7 +111,7 @@ class Films(BaseModel):
     Language: str
 
 
-@app.get('/api/view all', tags=['Films'])
+@app.get('/api/viewAll', tags=['Films'])
 def view_all():
     try:
         print(films_serial(film_collection.find()))
@@ -122,7 +122,7 @@ def view_all():
         return "failed"
 
 
-@app.get('/api/view student/{Sno}', tags=['Films'])
+@app.get('/api/viewStudent/{Sno}', tags=['Films'])
 def view_films(Sno: int):
     try:
         list_id = []
@@ -141,7 +141,7 @@ def view_films(Sno: int):
         return "failed"
 
 
-@app.post('/api/adding new film details', tags=['Films'])
+@app.post('/api/addingNewFilmDetails', tags=['Films'])
 def add_new_film(film: Films):
     try:
         film_collection.insert_one(film.dict())
@@ -173,7 +173,7 @@ def update_film(Sno, film: Films):
         return "failed"
 
 
-@app.delete('/api/formating film collection', tags=['Films'])
+@app.delete('/api/formatingFilmCollection', tags=['Films'])
 def format_collection():
     try:
         film_collection.drop()
@@ -183,7 +183,7 @@ def format_collection():
         return "failed"
 
 
-@app.delete('/api/deleting film{Sno}', tags=['Films'])
+@app.delete('/api/deletingFilm{Sno}', tags=['Films'])
 def delete_film(Sno):
     try:
         if film_collection.delete_one({"roll_num": int(Sno)}):
@@ -196,7 +196,7 @@ def delete_film(Sno):
         return "failed"
 
 
-@app.get('/api/Filter by Director/{Director}', tags=['Films'])
+@app.get('/api/FilterByDirector/{Director}', tags=['Films'])
 def list_by_director(Director):
     try:
         d = []
@@ -215,7 +215,7 @@ def list_by_director(Director):
         return "failed to filter"
 
 
-@app.get('/api/Filter by Year/{Year}', tags=['Films'])
+@app.get('/api/FilterByYear/{Year}', tags=['Films'])
 def list_by_Year(Year):
     try:
         response = films_serial(film_collection.find({"Year": int(Year)}))
@@ -226,7 +226,7 @@ def list_by_Year(Year):
         return "failed to filter"
 
 
-@app.get('/api/Filter from Year/{Year}', tags=['Films'])
+@app.get('/api/FilterFromYear/{Year}', tags=['Films'])
 def list_from_year(Year):
     try:
         year = []
