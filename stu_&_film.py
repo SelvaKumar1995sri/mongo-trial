@@ -1,8 +1,9 @@
+from tkinter import image_names
 from bson import ObjectId
 from pydantic import BaseModel
 import pymongo
 from flask import Flask
-from fastapi import FastAPI, File, UploadFile
+from fastapi import FastAPI, File, UploadFile,Depends,Request
 from requests import request
 import uvicorn
 from student_schema import Student_se, Student_serial, films_serial, films_schema
@@ -109,6 +110,7 @@ class Films(BaseModel):
     Writer: str
     Actors: str
     Language: str
+    image : str
 
 
 @app.get('/api/viewAll', tags=['Films'])
@@ -142,17 +144,17 @@ def view_films(Sno: int):
 
 
 @app.post('/api/addingNewFilmDetails', tags=['Films'])
-def add_new_film(film: Films):
+def add_new_film(film: Films = Depends(),file : UploadFile = File()):
     try:
         film_collection.insert_one(film.dict())
-        return "successfully added"
+        return "successfully added",{"Filename": file.filename}
     except Exception as e:
         print("error " + str(e))
         return "failed"
 
 
 @app.put('/api/updating/{Sno}', tags=['Films'])
-def update_film(Sno, film: Films):
+def update_film(Sno, film: Films = Depends(),file : UploadFile = File()):
     try:
         list_id = []
         for i in film_collection.find():
@@ -163,7 +165,7 @@ def update_film(Sno, film: Films):
         if max_id >= int(Sno):
             film_collection.update_many(
                 {"roll_num": int(Sno)}, {"$set": userip})
-            return "Successfully Updated"
+            return "Successfully Updated",{"Filename": file.filename}
 
         else:
             return "Given roll no not exist, Choose from existing Data to update"
@@ -242,12 +244,6 @@ def list_from_year(Year):
     except Exception as e:
         print("Error in filtering Director ", +str(e))
         return "failed to filter"
-
-@app.post('/uploadfile',tags=['Films'])
-def upload_file(file : UploadFile=File()):
-    films_serial(film_collection.insert_one({"file":file}))
-    
-    return {"name of the file":file.filename}
 
 
 if __name__ == '__main__':
