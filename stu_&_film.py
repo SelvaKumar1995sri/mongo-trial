@@ -1,3 +1,4 @@
+from bson.binary import Binary
 from tkinter import image_names
 from bson import ObjectId
 from pydantic import BaseModel
@@ -13,7 +14,7 @@ client = pymongo.MongoClient(
     "mongodb+srv://mongouser:mongopwd@cluster1.davwpcs.mongodb.net/?retryWrites=true&w=majority")
 my_db = client['mydatabase']
 Student_collection = my_db['school_registry']
-film_collection = my_db['film_collection']
+
 
 app = FastAPI()
 
@@ -25,7 +26,7 @@ class Student(BaseModel):
     location: str
 
 
-@app.get('/api/viewAll', tags=['student'])
+@app.get('/api/viewAllstudents', tags=['student'])
 def view_all():
     try:
         output = Student_serial(Student_collection.find())
@@ -112,12 +113,16 @@ class Films(BaseModel):
     Language: str
     image : str
 
+client = pymongo.MongoClient(
+    "mongodb+srv://mongouser:mongopwd@cluster1.davwpcs.mongodb.net/?retryWrites=true&w=majority")
+my_db = client['mydatabase']
+Film_collection = my_db['film_collection']
 
-@app.get('/api/viewAll', tags=['Films'])
-def view_all():
+@app.get('/api/viewAllFilms', tags=['Films'])
+def view_all_film():
     try:
-        print(films_serial(film_collection.find()))
-        return films_serial(film_collection.find())
+        print(films_serial(Film_collection.find()))
+        return films_serial(Film_collection.find())
 
     except Exception as e:
         print("error " + str(e))
@@ -128,11 +133,11 @@ def view_all():
 def view_films(Sno: int):
     try:
         list_id = []
-        for i in film_collection.find():
+        for i in Film_collection.find():
             list_id.append(i["Sno"])
         max_id = max(list_id)
         if max_id >= int(Sno):
-            output = films_serial(film_collection.find({"Sno": int(Sno)}))
+            output = films_serial(Film_collection.find({"Sno": int(Sno)}))
             print(output)
             return {"data": output}
         else:
@@ -144,28 +149,35 @@ def view_films(Sno: int):
 
 
 @app.post('/api/addingNewFilmDetails', tags=['Films'])
-def add_new_film(film: Films = Depends(),file : UploadFile = File()):
+def add_new_film(film: Films = Depends(),file : bytes = File()):
     try:
-        film_collection.insert_one(film.dict())
-        return "successfully added",{"Filename": file.filename}
+        dict3={}
+        dict1=film.dict()
+        dict2={"file_content":Binary(file)}
+        dict3.update(dict1)
+        dict3.update(dict2)
+        Film_collection.insert_one(dict3)
+        return "Successfully added"
     except Exception as e:
         print("error " + str(e))
         return "failed"
 
 
 @app.put('/api/updating/{Sno}', tags=['Films'])
-def update_film(Sno, film: Films = Depends(),file : UploadFile = File()):
+def update_film(
+    Sno, film: Films = Depends(), file : bytes = File()):
     try:
         list_id = []
-        for i in film_collection.find():
+        for i in Film_collection.find():
             list_id.append(i["Sno"])
         max_id = max(list_id)
         userip = dict(film)
 
         if max_id >= int(Sno):
-            film_collection.update_many(
-                {"roll_num": int(Sno)}, {"$set": userip})
-            return "Successfully Updated",{"Filename": file.filename}
+            Film_collection.update_many(
+                {"roll_num": int(Sno)}, {"$set": userip}
+                )
+            return "updated successfully"
 
         else:
             return "Given roll no not exist, Choose from existing Data to update"
@@ -178,7 +190,7 @@ def update_film(Sno, film: Films = Depends(),file : UploadFile = File()):
 @app.delete('/api/formatingFilmCollection', tags=['Films'])
 def format_collection():
     try:
-        film_collection.drop()
+        Film_collection.drop()
         return "successfully droped all data"
     except Exception as e:
         print("error " + str(e))
@@ -188,7 +200,7 @@ def format_collection():
 @app.delete('/api/deletingFilm{Sno}', tags=['Films'])
 def delete_film(Sno):
     try:
-        if film_collection.delete_one({"roll_num": int(Sno)}):
+        if Film_collection.delete_one({"roll_num": int(Sno)}):
             return "successfully deleted"
 
         else:
@@ -202,14 +214,14 @@ def delete_film(Sno):
 def list_by_director(Director):
     try:
         d = []
-        for i in film_collection.find():
+        for i in Film_collection.find():
             d.append(i["Director"])
 
         if Director not in d:
             return "Kindly give existing Film Director name or give valid name"
         else:
             response = films_serial(
-                film_collection.find({"Director": Director}))
+                Film_collection.find({"Director": Director}))
             return {"data": response}
 
     except Exception as e:
@@ -220,7 +232,7 @@ def list_by_director(Director):
 @app.get('/api/FilterByYear/{Year}', tags=['Films'])
 def list_by_Year(Year):
     try:
-        response = films_serial(film_collection.find({"Year": int(Year)}))
+        response = films_serial(Film_collection.find({"Year": int(Year)}))
         print(response)
         return {"data": response}
     except Exception as e:
@@ -232,10 +244,10 @@ def list_by_Year(Year):
 def list_from_year(Year):
     try:
         year = []
-        for y in film_collection.find():
+        for y in Film_collection.find():
             year.append(y["Year"])
         if max(year) >= int(Year):
-            result = films_serial(film_collection.find(
+            result = films_serial(Film_collection.find(
                 {'Year': {'$gte': int(Year)}}))
             return {"data": result}
         else:
